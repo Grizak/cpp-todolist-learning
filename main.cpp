@@ -30,7 +30,8 @@ int main()
     cout << "1. Add todo" << endl
          << "2. Mark complete" << endl
          << "3. View all" << endl
-         << "4. Exit" << endl;
+         << "4. Delete a todo" << endl
+         << "5. Exit" << endl;
     cin >> choice;
     cin.ignore(); // Clear the newline from input buffer
 
@@ -62,7 +63,19 @@ int main()
     if (choice == 3) {
       printTodos(todos);
     }
-    if (choice == 4)
+    if (choice == 4) {
+      printTodos(todos);
+      cout << "Choose a todo to delete" << endl;
+      int todoIdx;
+      cin >> todoIdx;
+      cin.ignore();
+      if (todoIdx > 0 && todoIdx <= todos.size()) {
+        Todo todo = todos[todoIdx - 1];
+        todos.erase(todos.begin() + todoIdx - 1);
+        cout << "Deleted todo: " << todo.title << endl;
+      };
+    }
+    if (choice == 5)
       break;
   }
 };
