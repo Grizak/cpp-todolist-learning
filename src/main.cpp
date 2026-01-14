@@ -2,6 +2,8 @@
 #include <map>
 #include <string>
 #include <functional>
+#include <vector>
+#include <fstream>
 #include "TodoManager.h"
 using namespace std;
 
@@ -52,15 +54,35 @@ map<int, Command> initialiseCommands()
         cin.ignore();
         manager.deleteTodo(todoIdx);
       }};
-  commands[5] = {"Exit", nullptr};
 
   return commands;
 }
 
 int main()
 {
-  auto commands = initialiseCommands();
   TodoManager manager;
+  ifstream inFile("todos.txt");
+  if (inFile)
+  {
+    string line;
+    while (getline(inFile, line))
+    {
+      if (line.empty())
+        continue;
+      bool completed = line[0] == '1';
+      string title = line.substr(2);
+      manager.addTodo(title, false);
+      if (completed)
+      {
+        size_t last = manager.getTodoCount(); // Get last added todo index (1-based for markComplete)
+        if (last > 0)
+          manager.markComplete(static_cast<int>(last));
+      }
+    }
+    inFile.close();
+  }
+
+  auto commands = initialiseCommands();
   int choice;
 
   while (true)
@@ -69,11 +91,13 @@ int main()
     {
       cout << key << ". " << cmd.description << endl;
     }
+    cout << "5. Exit" << endl;
+    cout << "Choose an option:" << endl;
     cin >> choice;
     cin.ignore();
 
-    // Break on last option
-    if (choice == commands.size())
+    // Break on last option (Exit)
+    if (choice == (commands.size() + 1))
       break;
 
     if (commands.find(choice) == commands.end())
@@ -89,6 +113,16 @@ int main()
     commands[choice].execute(manager);
     cout << endl;
   }
+
+  // Write todos to file
+  ofstream outFile("todos.txt");
+  for (size_t i = 0; i < manager.getTodoCount(); ++i)
+  {
+    // Assuming TodoManager has a method to get todo by index
+    Todo todo = manager.getTodoByIndex(static_cast<int>(i));
+    outFile << (!todo.completed ? "0" : "1") << " " << todo.title << endl;
+  }
+  outFile.close();
 
   return 0;
 }
