@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <fstream>
+#include <CLI/CLI.hpp>
 #include "TodoManager.h"
 using namespace std;
 
@@ -58,10 +59,15 @@ map<int, Command> initialiseCommands()
   return commands;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+  // Parse command line arguments
+  CLI::App app{"Todo List Manager"};
+  string filePath = "todos.txt";
+  app.add_option("-f,--file", filePath, "Path to the todo list file");
+  CLI11_PARSE(app, argc, argv);
   TodoManager manager;
-  ifstream inFile("todos.txt");
+  ifstream inFile(filePath);
   if (inFile)
   {
     string line;
@@ -115,7 +121,7 @@ int main()
   }
 
   // Write todos to file
-  ofstream outFile("todos.txt");
+  ofstream outFile(filePath);
   for (size_t i = 0; i < manager.getTodoCount(); ++i)
   {
     // Assuming TodoManager has a method to get todo by index
